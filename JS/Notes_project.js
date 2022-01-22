@@ -14,21 +14,24 @@ showNotes();
 let addBtn = document.getElementById("addBtn");
 addBtn.addEventListener("click", function (e) {
     let addTxt = document.getElementById("addTxt");
+    let addTitle = document.getElementById('title');
     let notes = localStorage.getItem('notes');
 
     if (notes == null) {
-        notesObj = [];
+        var notesObj = {};
     }
     else {
         notesObj = JSON.parse(notes);
     }
-
-    notesObj.push(addTxt.value);
+    let title = addTitle.value;
+    let text = addTxt.value;
+    notesObj[title] = text;
     localStorage.setItem('notes', JSON.stringify(notesObj));
     addTxt.value = '';
+    addTitle.value = '';
     // console.log(notesObj);
-    alert("Your note has been added Successfully!");
     showNotes();
+    alert("Your note has been added Successfully!");
 });
 
 
@@ -36,24 +39,24 @@ addBtn.addEventListener("click", function (e) {
 function showNotes() {
     let notes = localStorage.getItem('notes');
     if (notes == null) {
-        notesObj = [];
+        notesObj = {};
     }
     else {
         notesObj = JSON.parse(notes);
     }
     let html = "";
-    notesObj.forEach(function (element, index) {
+    for (var key in notesObj) {
         html += `<div class="my-2 mx-2 card noteCard" style = "width: 18rem;">
         <div class=" card-body">
-            <h5 class="card-title">Note ${index + 1}</h5>
-            <p class="card-text">${element}</p>
-            <button onclick="deleteNote(${index})" class="btn btn-primary">Delete note</button>
+            <h5 class="card-title">${key}</h5>
+            <p class="card-text">${notesObj[key]}</p>
+            <button onclick="deleteNote('${key}')" class="btn btn-primary">Delete note</button>
         </div>
             </div >`;
-    });
+    };
 
     let notesElem = document.getElementById('notes');
-    if (notesObj.length != 0) {
+    if (Object.keys(notesObj).length != 0) {
         notesElem.innerHTML = html;
     }
     else {
@@ -63,10 +66,11 @@ function showNotes() {
 }
 
 // function to delete notes.
-function deleteNote(index) {
+function deleteNote(key) {
+    // console.log(key);
     let sure = confirm("Do you really want to delete the note!");
     if (sure) {
-        notesObj.splice(index, 1);
+        delete notesObj[key];
         localStorage.setItem('notes', JSON.stringify(notesObj));
         showNotes();
     }
@@ -80,7 +84,8 @@ search.addEventListener("input", function () {
     let noteCard = document.getElementsByClassName("noteCard");
     Array.from(noteCard).forEach(function (element) {
         let cardTxt = element.getElementsByTagName('p')[0];
-        if (cardTxt.innerText.includes(inputVal)) {
+        let cardTitle = element.getElementsByTagName('h5')[0];
+        if (cardTxt.innerText.includes(inputVal) || cardTitle.innerText.includes(inputVal)) {
             element.style.display = "block";
         }
         else {
